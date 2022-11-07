@@ -1,6 +1,6 @@
 const canvas = document.querySelector("canvas") as HTMLCanvasElement;
 
-const c = canvas.getContext("2d");
+const c = canvas.getContext("2d") as CanvasRenderingContext2D;
 
 canvas.width = innerWidth;
 canvas.height = innerHeight;
@@ -22,6 +22,32 @@ class Boundary {
   }
 
   draw() {
-    c?.fillRect(this.position.x, this.position.y, this.width, this.height);
+    c.fillStyle = "blue";
+    c.fillRect(this.position.y, this.position.x, this.width, this.height);
   }
 }
+
+const mapping = [
+  ["-", "-", "-", "-", "-", "-", "-"],
+  ["-", " ", " ", " ", " ", " ", "-"],
+  ["-", " ", " ", " ", " ", " ", "-"],
+  ["-", " ", " ", " ", " ", " ", "-"],
+  ["-", "-", "-", "-", "-", "-", "-"],
+];
+
+let blocks: Array<Boundary> = [];
+
+mapping.forEach((row, i) => {
+  row.forEach((symbol, j) => {
+    switch (symbol) {
+      case "-": {
+        blocks.push(new Boundary({ x: 40 + j, y: 40 }));
+        break;
+      }
+    }
+  });
+});
+
+blocks.forEach((block) => {
+  block.draw();
+});

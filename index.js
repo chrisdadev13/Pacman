@@ -9,7 +9,30 @@ var Boundary = /** @class */ (function () {
         this.height = 40;
     }
     Boundary.prototype.draw = function () {
-        c === null || c === void 0 ? void 0 : c.fillRect(this.position.x, this.position.y, this.width, this.height);
+        c.fillStyle = "blue";
+        c.fillRect(this.position.y, this.position.x, this.width, this.height);
     };
     return Boundary;
 }());
+var mapping = [
+    ["-", "-", "-", "-", "-", "-", "-"],
+    ["-", " ", " ", " ", " ", " ", "-"],
+    ["-", " ", " ", " ", " ", " ", "-"],
+    ["-", " ", " ", " ", " ", " ", "-"],
+    ["-", "-", "-", "-", "-", "-", "-"],
+];
+var blocks = [];
+mapping.forEach(function (row, i) {
+    row.forEach(function (symbol, j) {
+        switch (symbol) {
+            case "-": {
+                blocks.push(new Boundary({ x: 40 + j, y: 40 }));
+                break;
+            }
+        }
+    });
+});
+blocks.forEach(function (block) {
+    block.draw();
+});
+console.log(blocks);
