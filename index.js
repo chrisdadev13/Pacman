@@ -38,6 +38,20 @@ var Player = /** @class */ (function () {
     };
     return Player;
 }());
+var Pellet = /** @class */ (function () {
+    function Pellet(position) {
+        this.position = position;
+        this.radius = 3;
+    }
+    Pellet.prototype.draw = function () {
+        c.beginPath();
+        c.arc(this.position.x, this.position.y, this.radius, 0, Math.PI * 2);
+        c.fillStyle = "white";
+        c.fill();
+        c.closePath();
+    };
+    return Pellet;
+}());
 var keys = {
     up: {
         pressed: false
@@ -69,6 +83,7 @@ var mapping = [
     ["4", "-", "-", "-", "-", "-", "-", "-", "-", "-", "3"],
 ];
 var blocks = [];
+var pellets = [];
 var player = new Player({
     x: Boundary.width + Boundary.width / 2,
     y: Boundary.height + Boundary.height / 2
@@ -149,6 +164,13 @@ mapping.forEach(function (row, i) {
                 blocks.push(new Boundary({ x: Boundary.width * j, y: Boundary.height * i }, createSprite("./assets/pipeConnectorLeft.png")));
                 break;
             }
+            case ".": {
+                pellets.push(new Pellet({
+                    x: j * Boundary.width + Boundary.width / 2,
+                    y: i * Boundary.height + Boundary.height / 2
+                }));
+                break;
+            }
         }
     });
 });
@@ -164,6 +186,9 @@ function characterCollideWithBlock(player, block) {
 function animate() {
     requestAnimationFrame(animate);
     c.clearRect(0, 0, canvas.width, canvas.height);
+    pellets.forEach(function (pellet) {
+        pellet.draw();
+    });
     blocks.forEach(function (block) {
         block.draw();
         if (characterCollideWithBlock(player, block)) {

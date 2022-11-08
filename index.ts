@@ -64,6 +64,23 @@ class Player {
   }
 }
 
+class Pellet {
+  position: Position;
+  radius: number;
+  constructor(position: Position) {
+    this.position = position;
+    this.radius = 3;
+  }
+
+  draw() {
+    c.beginPath();
+    c.arc(this.position.x, this.position.y, this.radius, 0, Math.PI * 2);
+    c.fillStyle = "white";
+    c.fill();
+    c.closePath();
+  }
+}
+
 let keys = {
   up: {
     pressed: false,
@@ -98,7 +115,7 @@ const mapping = [
 ];
 
 let blocks: Array<Boundary> = [];
-
+let pellets: Array<Pellet> = [];
 const player = new Player(
   {
     x: Boundary.width + Boundary.width / 2,
@@ -265,6 +282,15 @@ mapping.forEach((row, i) => {
         );
         break;
       }
+      case ".": {
+        pellets.push(
+          new Pellet({
+            x: j * Boundary.width + Boundary.width / 2,
+            y: i * Boundary.height + Boundary.height / 2,
+          })
+        );
+        break;
+      }
     }
   });
 });
@@ -288,6 +314,9 @@ function characterCollideWithBlock(player: Player, block: Boundary) {
 function animate() {
   requestAnimationFrame(animate);
   c.clearRect(0, 0, canvas.width, canvas.height);
+  pellets.forEach((pellet) => {
+    pellet.draw();
+  });
   blocks.forEach((block) => {
     block.draw();
     if (characterCollideWithBlock(player, block)) {
