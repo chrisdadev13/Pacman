@@ -116,29 +116,28 @@ mapping.forEach((row, i) => {
   });
 });
 
+function characterCollideWithBlock(player: Player, block: Boundary) {
+  return (
+    player.position.y - player.radius + player.velocity.y <=
+      block.position.y + block.height &&
+    player.position.x + player.radius + player.velocity.x >= block.position.x &&
+    player.position.y + player.radius + player.velocity.y >= block.position.y &&
+    player.position.x - player.radius + player.velocity.x <=
+      block.position.x + block.width
+  );
+}
+
 function animate() {
   requestAnimationFrame(animate);
   c.clearRect(0, 0, canvas.width, canvas.height);
   blocks.forEach((block) => {
     block.draw();
-    if (
-      player.position.y - player.radius + player.velocity.y <=
-        block.position.y + block.height &&
-      player.position.x + player.radius + player.velocity.x >=
-        block.position.x &&
-      player.position.y + player.radius + player.velocity.y >=
-        block.position.y &&
-      player.position.x - player.radius + player.velocity.x <=
-        player.position.x + block.width
-    ) {
+    if (characterCollideWithBlock(player, block)) {
       player.velocity.x = 0;
       player.velocity.y = 0;
     }
   });
-
   player.move();
-  player.velocity.x = 0;
-  player.velocity.y = 0;
 
   if (keys.up.pressed && lastKey === "up") {
     player.velocity.y = -5;
