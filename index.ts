@@ -19,19 +19,22 @@ class Boundary {
   position: Position;
   width: number;
   height: number;
+  image: CanvasImageSource;
 
   static width = 40;
   static height = 40;
 
-  constructor(position: Position) {
+  constructor(position: Position, image: CanvasImageSource) {
     this.position = position;
     this.width = 40;
     this.height = 40;
+    this.image = image;
   }
 
   draw() {
-    c.fillStyle = "blue";
-    c.fillRect(this.position.x, this.position.y, this.width, this.height);
+    //c.fillStyle = "blue";
+    //c.fillRect(this.position.x, this.position.y, this.width, this.height);
+    c.drawImage(this.image, this.position.x, this.position.y);
   }
 }
 
@@ -79,13 +82,19 @@ let keys = {
 let lastKey: string;
 
 const mapping = [
-  ["-", "-", "-", "-", "-", "-", "-", "-"],
-  ["-", " ", " ", " ", " ", " ", " ", "-"],
-  ["-", " ", " ", " ", " ", " ", " ", "-"],
-  ["-", " ", "-", "-", "-", "-", " ", "-"],
-  ["-", " ", " ", " ", " ", " ", " ", "-"],
-  ["-", " ", " ", " ", " ", " ", " ", "-"],
-  ["-", "-", "-", "-", "-", "-", "-", "-"],
+  ["1", "-", "-", "-", "-", "-", "-", "-", "-", "-", "2"],
+  ["|", ".", ".", ".", ".", ".", ".", ".", ".", ".", "|"],
+  ["|", ".", "b", ".", "[", "7", "]", ".", "b", ".", "|"],
+  ["|", ".", ".", ".", ".", "_", ".", ".", ".", ".", "|"],
+  ["|", ".", "[", "]", ".", ".", ".", "[", "]", ".", "|"],
+  ["|", ".", ".", ".", ".", "^", ".", ".", ".", ".", "|"],
+  ["|", ".", "b", ".", "[", "+", "]", ".", "b", ".", "|"],
+  ["|", ".", ".", ".", ".", "_", ".", ".", ".", ".", "|"],
+  ["|", ".", "[", "]", ".", ".", ".", "[", "]", ".", "|"],
+  ["|", ".", ".", ".", ".", "^", ".", ".", ".", ".", "|"],
+  ["|", ".", "b", ".", "[", "5", "]", ".", "b", ".", "|"],
+  ["|", ".", ".", ".", ".", ".", ".", ".", ".", "p", "|"],
+  ["4", "-", "-", "-", "-", "-", "-", "-", "-", "-", "3"],
 ];
 
 let blocks: Array<Boundary> = [];
@@ -100,21 +109,170 @@ const player = new Player(
 
 player.draw();
 
+function createSprite(src: string) {
+  const sprite = new Image();
+  sprite.src = src;
+  return sprite;
+}
+
 mapping.forEach((row, i) => {
   row.forEach((symbol, j) => {
     switch (symbol) {
       case "-": {
         blocks.push(
-          new Boundary({
-            x: Boundary.width * j,
-            y: Boundary.height * i,
-          })
+          new Boundary(
+            {
+              x: Boundary.width * j,
+              y: Boundary.height * i,
+            },
+            createSprite("./assets/pipeHorizontal.png")
+          )
+        );
+        break;
+      }
+      case "|": {
+        blocks.push(
+          new Boundary(
+            { x: Boundary.width * j, y: Boundary.height * i },
+            createSprite("./assets/pipeVertical.png")
+          )
+        );
+        break;
+      }
+      case "1": {
+        blocks.push(
+          new Boundary(
+            { x: Boundary.width * j, y: Boundary.height * i },
+            createSprite("./assets/pipeCorner1.png")
+          )
+        );
+        break;
+      }
+      case "2": {
+        blocks.push(
+          new Boundary(
+            { x: Boundary.width * j, y: Boundary.height * i },
+            createSprite("./assets/pipeCorner2.png")
+          )
+        );
+        break;
+      }
+      case "3": {
+        blocks.push(
+          new Boundary(
+            { x: Boundary.width * j, y: Boundary.height * i },
+            createSprite("./assets/pipeCorner3.png")
+          )
+        );
+        break;
+      }
+      case "4": {
+        blocks.push(
+          new Boundary(
+            { x: Boundary.width * j, y: Boundary.height * i },
+            createSprite("./assets/pipeCorner4.png")
+          )
+        );
+        break;
+      }
+      case "b": {
+        blocks.push(
+          new Boundary(
+            { x: Boundary.width * j, y: Boundary.height * i },
+            createSprite("./assets/block.png")
+          )
+        );
+        break;
+      }
+      case "[": {
+        blocks.push(
+          new Boundary(
+            { x: Boundary.width * j, y: Boundary.height * i },
+            createSprite("./assets/capLeft.png")
+          )
+        );
+        break;
+      }
+      case "]": {
+        blocks.push(
+          new Boundary(
+            { x: Boundary.width * j, y: Boundary.height * i },
+            createSprite("./assets/capRight.png")
+          )
+        );
+        break;
+      }
+      case "_": {
+        blocks.push(
+          new Boundary(
+            { x: Boundary.width * j, y: Boundary.height * i },
+            createSprite("./assets/capBottom.png")
+          )
+        );
+        break;
+      }
+      case "^": {
+        blocks.push(
+          new Boundary(
+            { x: Boundary.width * j, y: Boundary.height * i },
+            createSprite("./assets/capTop.png")
+          )
+        );
+        break;
+      }
+      case "+": {
+        blocks.push(
+          new Boundary(
+            { x: Boundary.width * j, y: Boundary.height * i },
+            createSprite("./assets/pipeCross.png")
+          )
+        );
+        break;
+      }
+      case "5": {
+        blocks.push(
+          new Boundary(
+            { x: Boundary.width * j, y: Boundary.height * i },
+            createSprite("./assets/pipeConnectorTop.png")
+          )
+        );
+        break;
+      }
+      case "6": {
+        blocks.push(
+          new Boundary(
+            { x: Boundary.width * j, y: Boundary.height * i },
+            createSprite("./assets/pipeConnectorRight.png")
+          )
+        );
+        break;
+      }
+      case "7": {
+        blocks.push(
+          new Boundary(
+            { x: Boundary.width * j, y: Boundary.height * i },
+            createSprite("./assets/pipeConnectorBottom.png")
+          )
+        );
+        break;
+      }
+      case "8": {
+        blocks.push(
+          new Boundary(
+            { x: Boundary.width * j, y: Boundary.height * i },
+            createSprite("./assets/pipeConnectorLeft.png")
+          )
         );
         break;
       }
     }
   });
 });
+
+const test = new Boundary(
+  { x: 3, y: 3 },
+  createSprite("./assets/pipeHorizontal.png")
+);
 
 function characterCollideWithBlock(player: Player, block: Boundary) {
   return (
