@@ -1,4 +1,7 @@
 const canvas = document.querySelector("canvas") as HTMLCanvasElement;
+const scoreEl = document.querySelector("#score") as HTMLSpanElement;
+
+let score: number = 0;
 
 const c = canvas.getContext("2d") as CanvasRenderingContext2D;
 
@@ -314,8 +317,19 @@ function characterCollideWithBlock(player: Player, block: Boundary) {
 function animate() {
   requestAnimationFrame(animate);
   c.clearRect(0, 0, canvas.width, canvas.height);
-  pellets.forEach((pellet) => {
+  pellets.forEach((pellet, i) => {
     pellet.draw();
+    if (
+      Math.hypot(
+        pellet.position.x - player.position.x,
+        pellet.position.y - player.position.y
+      ) <
+      pellet.radius + player.radius
+    ) {
+      pellets.splice(i, 1);
+      score += 10;
+      scoreEl.innerHTML = score.toString();
+    }
   });
   blocks.forEach((block) => {
     block.draw();

@@ -1,4 +1,6 @@
 var canvas = document.querySelector("canvas");
+var scoreEl = document.querySelector("#score");
+var score = 0;
 var c = canvas.getContext("2d");
 canvas.width = innerWidth;
 canvas.height = innerHeight;
@@ -186,8 +188,14 @@ function characterCollideWithBlock(player, block) {
 function animate() {
     requestAnimationFrame(animate);
     c.clearRect(0, 0, canvas.width, canvas.height);
-    pellets.forEach(function (pellet) {
+    pellets.forEach(function (pellet, i) {
         pellet.draw();
+        if (Math.hypot(pellet.position.x - player.position.x, pellet.position.y - player.position.y) <
+            pellet.radius + player.radius) {
+            pellets.splice(i, 1);
+            score += 10;
+            scoreEl.innerHTML = score.toString();
+        }
     });
     blocks.forEach(function (block) {
         block.draw();
