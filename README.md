@@ -1,6 +1,7 @@
 # Pacman
 
 This is a simple Pacman clone, created with Typescript/Javascript, HTML5 canvas and CSS.
+In future I plan to code this game again but in C++, using SMFL, and with a better AI.
 
 # What I learned
 
