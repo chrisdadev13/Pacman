@@ -45,6 +45,38 @@ class Player {
   position: Position;
   velocity: Velocity;
   radius: number;
+  color: string;
+
+  constructor(
+    position: Position,
+    velocity: Velocity,
+    color: string = "yellow"
+  ) {
+    this.position = position;
+    this.velocity = velocity;
+    this.radius = 15;
+    this.color = color;
+  }
+
+  draw() {
+    c.beginPath();
+    c.arc(this.position.x, this.position.y, this.radius, 0, Math.PI * 2);
+    c.fillStyle = this.color;
+    c.fill();
+    c.closePath();
+  }
+
+  move() {
+    this.draw();
+    this.position.y += this.velocity.y;
+    this.position.x += this.velocity.x;
+  }
+}
+
+class Ghost {
+  position: Position;
+  velocity: Velocity;
+  radius: number;
 
   constructor(position: Position, velocity: Velocity) {
     this.position = position;
@@ -55,7 +87,7 @@ class Player {
   draw() {
     c.beginPath();
     c.arc(this.position.x, this.position.y, this.radius, 0, Math.PI * 2);
-    c.fillStyle = "yellow";
+    c.fillStyle = "red";
     c.fill();
     c.closePath();
   }
@@ -119,6 +151,15 @@ const mapping = [
 
 let blocks: Array<Boundary> = [];
 let pellets: Array<Pellet> = [];
+let ghosts: Array<Ghost> = [
+  new Ghost(
+    {
+      x: Boundary.width * 7 + Boundary.width / 2,
+      y: Boundary.height + Boundary.height / 2,
+    },
+    { x: 0, y: 0 }
+  ),
+];
 const player = new Player(
   {
     x: Boundary.width + Boundary.width / 2,
@@ -317,6 +358,40 @@ function characterCollideWithBlock(player: Player, block: Boundary) {
 function animate() {
   requestAnimationFrame(animate);
   c.clearRect(0, 0, canvas.width, canvas.height);
+
+  if (keys.up.pressed && lastKey === "up") {
+    blocks.forEach((block) => {
+      if (characterCollideWithBlock(player, block)) {
+        player.velocity.y = 0;
+      } else {
+        player.velocity.y = -5;
+      }
+    });
+  } else if (keys.right.pressed && lastKey == "right") {
+    blocks.forEach((block) => {
+      if (characterCollideWithBlock(player, block)) {
+        player.velocity.x = 0;
+      } else {
+        player.velocity.x = 5;
+      }
+    });
+  } else if (keys.down.pressed && lastKey == "down") {
+    blocks.forEach((block) => {
+      if (characterCollideWithBlock(player, block)) {
+        player.velocity.y = 0;
+      } else {
+        player.velocity.y = +5;
+      }
+    });
+  } else if (keys.left.pressed && lastKey == "left") {
+    blocks.forEach((block) => {
+      if (characterCollideWithBlock(player, block)) {
+        player.velocity.x = 0;
+      } else {
+        player.velocity.x = -5;
+      }
+    });
+  }
   pellets.forEach((pellet, i) => {
     pellet.draw();
     if (
@@ -340,6 +415,9 @@ function animate() {
   });
   player.move();
 
+  ghosts.forEach((ghost) => {
+    ghost.move();
+  });
   if (keys.up.pressed && lastKey === "up") {
     player.velocity.y = -5;
   } else if (keys.down.pressed && lastKey === "down") {

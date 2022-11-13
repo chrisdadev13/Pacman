@@ -21,15 +21,17 @@ var Boundary = /** @class */ (function () {
     return Boundary;
 }());
 var Player = /** @class */ (function () {
-    function Player(position, velocity) {
+    function Player(position, velocity, color) {
+        if (color === void 0) { color = "yellow"; }
         this.position = position;
         this.velocity = velocity;
         this.radius = 15;
+        this.color = color;
     }
     Player.prototype.draw = function () {
         c.beginPath();
         c.arc(this.position.x, this.position.y, this.radius, 0, Math.PI * 2);
-        c.fillStyle = "yellow";
+        c.fillStyle = this.color;
         c.fill();
         c.closePath();
     };
@@ -39,6 +41,26 @@ var Player = /** @class */ (function () {
         this.position.x += this.velocity.x;
     };
     return Player;
+}());
+var Ghost = /** @class */ (function () {
+    function Ghost(position, velocity) {
+        this.position = position;
+        this.velocity = velocity;
+        this.radius = 15;
+    }
+    Ghost.prototype.draw = function () {
+        c.beginPath();
+        c.arc(this.position.x, this.position.y, this.radius, 0, Math.PI * 2);
+        c.fillStyle = "red";
+        c.fill();
+        c.closePath();
+    };
+    Ghost.prototype.move = function () {
+        this.draw();
+        this.position.y += this.velocity.y;
+        this.position.x += this.velocity.x;
+    };
+    return Ghost;
 }());
 var Pellet = /** @class */ (function () {
     function Pellet(position) {
@@ -86,6 +108,12 @@ var mapping = [
 ];
 var blocks = [];
 var pellets = [];
+var ghosts = [
+    new Ghost({
+        x: Boundary.width * 7 + Boundary.width / 2,
+        y: Boundary.height + Boundary.height / 2
+    }, { x: 0, y: 0 }),
+];
 var player = new Player({
     x: Boundary.width + Boundary.width / 2,
     y: Boundary.height + Boundary.height / 2
@@ -188,6 +216,46 @@ function characterCollideWithBlock(player, block) {
 function animate() {
     requestAnimationFrame(animate);
     c.clearRect(0, 0, canvas.width, canvas.height);
+    if (keys.up.pressed && lastKey === "up") {
+        blocks.forEach(function (block) {
+            if (characterCollideWithBlock(player, block)) {
+                player.velocity.y = 0;
+            }
+            else {
+                player.velocity.y = -5;
+            }
+        });
+    }
+    else if (keys.right.pressed && lastKey == "right") {
+        blocks.forEach(function (block) {
+            if (characterCollideWithBlock(player, block)) {
+                player.velocity.x = 0;
+            }
+            else {
+                player.velocity.x = 5;
+            }
+        });
+    }
+    else if (keys.down.pressed && lastKey == "down") {
+        blocks.forEach(function (block) {
+            if (characterCollideWithBlock(player, block)) {
+                player.velocity.y = 0;
+            }
+            else {
+                player.velocity.y = +5;
+            }
+        });
+    }
+    else if (keys.left.pressed && lastKey == "left") {
+        blocks.forEach(function (block) {
+            if (characterCollideWithBlock(player, block)) {
+                player.velocity.x = 0;
+            }
+            else {
+                player.velocity.x = -5;
+            }
+        });
+    }
     pellets.forEach(function (pellet, i) {
         pellet.draw();
         if (Math.hypot(pellet.position.x - player.position.x, pellet.position.y - player.position.y) <
@@ -205,6 +273,9 @@ function animate() {
         }
     });
     player.move();
+    ghosts.forEach(function (ghost) {
+        ghost.move();
+    });
     if (keys.up.pressed && lastKey === "up") {
         player.velocity.y = -5;
     }
