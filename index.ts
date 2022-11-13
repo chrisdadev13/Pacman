@@ -77,11 +77,13 @@ class Ghost {
   position: Position;
   velocity: Velocity;
   radius: number;
+  prevCollisions: Array<string>;
 
   constructor(position: Position, velocity: Velocity) {
     this.position = position;
     this.velocity = velocity;
     this.radius = 15;
+    this.prevCollisions = [];
   }
 
   draw() {
@@ -339,19 +341,18 @@ mapping.forEach((row, i) => {
   });
 });
 
-const test = new Boundary(
-  { x: 3, y: 3 },
-  createSprite("./assets/pipeHorizontal.png")
-);
-
-function characterCollideWithBlock(player: Player, block: Boundary) {
+function characterCollideWithBlock(
+  character: Player | Ghost,
+  position: Position,
+  velocity: Velocity,
+  block: Boundary
+): boolean {
   return (
-    player.position.y - player.radius + player.velocity.y <=
+    position.y - character.radius + velocity.y <=
       block.position.y + block.height &&
-    player.position.x + player.radius + player.velocity.x >= block.position.x &&
-    player.position.y + player.radius + player.velocity.y >= block.position.y &&
-    player.position.x - player.radius + player.velocity.x <=
-      block.position.x + block.width
+    position.x + character.radius + velocity.x >= block.position.x &&
+    position.y + character.radius + velocity.y >= block.position.y &&
+    position.x - character.radius + velocity.x <= block.position.x + block.width
   );
 }
 
@@ -361,7 +362,14 @@ function animate() {
 
   if (keys.up.pressed && lastKey === "up") {
     blocks.forEach((block) => {
-      if (characterCollideWithBlock(player, block)) {
+      if (
+        characterCollideWithBlock(
+          player,
+          player.position,
+          player.velocity,
+          block
+        )
+      ) {
         player.velocity.y = 0;
       } else {
         player.velocity.y = -5;
@@ -369,7 +377,14 @@ function animate() {
     });
   } else if (keys.right.pressed && lastKey == "right") {
     blocks.forEach((block) => {
-      if (characterCollideWithBlock(player, block)) {
+      if (
+        characterCollideWithBlock(
+          player,
+          player.position,
+          player.velocity,
+          block
+        )
+      ) {
         player.velocity.x = 0;
       } else {
         player.velocity.x = 5;
@@ -377,7 +392,14 @@ function animate() {
     });
   } else if (keys.down.pressed && lastKey == "down") {
     blocks.forEach((block) => {
-      if (characterCollideWithBlock(player, block)) {
+      if (
+        characterCollideWithBlock(
+          player,
+          player.position,
+          player.velocity,
+          block
+        )
+      ) {
         player.velocity.y = 0;
       } else {
         player.velocity.y = +5;
@@ -385,7 +407,14 @@ function animate() {
     });
   } else if (keys.left.pressed && lastKey == "left") {
     blocks.forEach((block) => {
-      if (characterCollideWithBlock(player, block)) {
+      if (
+        characterCollideWithBlock(
+          player,
+          player.position,
+          player.velocity,
+          block
+        )
+      ) {
         player.velocity.x = 0;
       } else {
         player.velocity.x = -5;
@@ -408,7 +437,9 @@ function animate() {
   });
   blocks.forEach((block) => {
     block.draw();
-    if (characterCollideWithBlock(player, block)) {
+    if (
+      characterCollideWithBlock(player, player.position, player.velocity, block)
+    ) {
       player.velocity.x = 0;
       player.velocity.y = 0;
     }
@@ -417,6 +448,57 @@ function animate() {
 
   ghosts.forEach((ghost) => {
     ghost.move();
+
+    let collisions: Array<string> = [];
+    blocks.forEach((block) => {
+      if (
+        !collisions.includes("right") &&
+        characterCollideWithBlock(
+          ghost,
+          ghost.position,
+          { ...ghost.velocity, x: 5, y: 0 },
+          block
+        )
+      ) {
+        collisions.push("right");
+      } else if (
+        !collisions.includes("left") &&
+        characterCollideWithBlock(
+          ghost,
+          ghost.position,
+          { ...ghost.velocity, x: -5, y: 0 },
+          block
+        )
+      ) {
+        collisions.push("left");
+      } else if (
+        !collisions.includes("top") &&
+        characterCollideWithBlock(
+          ghost,
+          ghost.position,
+          { ...ghost.velocity, x: 0, y: -5 },
+          block
+        )
+      ) {
+        collisions.push("top");
+      } else if (
+        !collisions.includes("down") &&
+        characterCollideWithBlock(
+          ghost,
+          ghost.position,
+          { ...ghost.velocity, x: 0, y: 5 },
+          block
+        )
+      ) {
+        collisions.push("bottom");
+      }
+      if (collisions.length > ghost.prevCollisions.length) {
+        ghost.prevCollisions = collisions;
+      }
+      if (JSON.stringify(collisions) !== JSON.stringify(ghost.prevCollisions)) {
+        console.log("googog");
+      }
+    });
   });
   if (keys.up.pressed && lastKey === "up") {
     player.velocity.y = -5;

@@ -1,3 +1,14 @@
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
 var canvas = document.querySelector("canvas");
 var scoreEl = document.querySelector("#score");
 var score = 0;
@@ -204,21 +215,19 @@ mapping.forEach(function (row, i) {
         }
     });
 });
-var test = new Boundary({ x: 3, y: 3 }, createSprite("./assets/pipeHorizontal.png"));
-function characterCollideWithBlock(player, block) {
-    return (player.position.y - player.radius + player.velocity.y <=
+function characterCollideWithBlock(character, position, velocity, block) {
+    return (position.y - character.radius + velocity.y <=
         block.position.y + block.height &&
-        player.position.x + player.radius + player.velocity.x >= block.position.x &&
-        player.position.y + player.radius + player.velocity.y >= block.position.y &&
-        player.position.x - player.radius + player.velocity.x <=
-            block.position.x + block.width);
+        position.x + character.radius + velocity.x >= block.position.x &&
+        position.y + character.radius + velocity.y >= block.position.y &&
+        position.x - character.radius + velocity.x <= block.position.x + block.width);
 }
 function animate() {
     requestAnimationFrame(animate);
     c.clearRect(0, 0, canvas.width, canvas.height);
     if (keys.up.pressed && lastKey === "up") {
         blocks.forEach(function (block) {
-            if (characterCollideWithBlock(player, block)) {
+            if (characterCollideWithBlock(player, player.position, player.velocity, block)) {
                 player.velocity.y = 0;
             }
             else {
@@ -228,7 +237,7 @@ function animate() {
     }
     else if (keys.right.pressed && lastKey == "right") {
         blocks.forEach(function (block) {
-            if (characterCollideWithBlock(player, block)) {
+            if (characterCollideWithBlock(player, player.position, player.velocity, block)) {
                 player.velocity.x = 0;
             }
             else {
@@ -238,7 +247,7 @@ function animate() {
     }
     else if (keys.down.pressed && lastKey == "down") {
         blocks.forEach(function (block) {
-            if (characterCollideWithBlock(player, block)) {
+            if (characterCollideWithBlock(player, player.position, player.velocity, block)) {
                 player.velocity.y = 0;
             }
             else {
@@ -248,7 +257,7 @@ function animate() {
     }
     else if (keys.left.pressed && lastKey == "left") {
         blocks.forEach(function (block) {
-            if (characterCollideWithBlock(player, block)) {
+            if (characterCollideWithBlock(player, player.position, player.velocity, block)) {
                 player.velocity.x = 0;
             }
             else {
@@ -267,7 +276,7 @@ function animate() {
     });
     blocks.forEach(function (block) {
         block.draw();
-        if (characterCollideWithBlock(player, block)) {
+        if (characterCollideWithBlock(player, player.position, player.velocity, block)) {
             player.velocity.x = 0;
             player.velocity.y = 0;
         }
@@ -275,6 +284,22 @@ function animate() {
     player.move();
     ghosts.forEach(function (ghost) {
         ghost.move();
+        var collisions = [];
+        blocks.forEach(function (block) {
+            if (characterCollideWithBlock(ghost, ghost.position, __assign(__assign({}, ghost.velocity), { x: 5, y: 0 }), block)) {
+                collisions.push("right");
+            }
+            else if (characterCollideWithBlock(ghost, ghost.position, __assign(__assign({}, ghost.velocity), { x: -5, y: 0 }), block)) {
+                collisions.push("left");
+            }
+            else if (characterCollideWithBlock(ghost, ghost.position, __assign(__assign({}, ghost.velocity), { x: 0, y: -5 }), block)) {
+                collisions.push("top");
+            }
+            else if (characterCollideWithBlock(ghost, ghost.position, __assign(__assign({}, ghost.velocity), { x: 0, y: 5 }), block)) {
+                collisions.push("bottom");
+            }
+            console.log(collisions);
+        });
     });
     if (keys.up.pressed && lastKey === "up") {
         player.velocity.y = -5;
