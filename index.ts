@@ -361,8 +361,9 @@ function characterCollideWithBlock(
   );
 }
 
+let animationId: number;
 function animate() {
-  requestAnimationFrame(animate);
+  animationId = requestAnimationFrame(animate);
   c.clearRect(0, 0, canvas.width, canvas.height);
 
   if (keys.up.pressed && lastKey === "up") {
@@ -457,13 +458,11 @@ function animate() {
     if (
       Math.hypot(
         ghost.position.x - player.position.x,
-        ghost.position.y - player.position.x
+        ghost.position.y - player.position.y
       ) <
       ghost.radius + player.radius
     ) {
-      player.velocity.x = 0;
-      player.velocity.y = 0;
-      console.log("You lose");
+      cancelAnimationFrame(animationId);
     }
 
     const collisions: Array<string> = [];
@@ -576,6 +575,10 @@ function animate() {
     player.velocity.x = 5;
   } else if (keys.left.pressed && lastKey === "left") {
     player.velocity.x = -5;
+  }
+
+  if (pellets.length === 0) {
+    cancelAnimationFrame(animationId);
   }
 }
 

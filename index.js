@@ -227,8 +227,9 @@ function characterCollideWithBlock(character, position, velocity, block) {
         position.x - character.radius + velocity.x <=
             block.position.x + block.width + padding);
 }
+var animationId;
 function animate() {
-    requestAnimationFrame(animate);
+    animationId = requestAnimationFrame(animate);
     c.clearRect(0, 0, canvas.width, canvas.height);
     if (keys.up.pressed && lastKey === "up") {
         blocks.forEach(function (block) {
@@ -289,6 +290,10 @@ function animate() {
     player.move();
     ghosts.forEach(function (ghost) {
         ghost.move();
+        if (Math.hypot(ghost.position.x - player.position.x, ghost.position.y - player.position.y) <
+            ghost.radius + player.radius) {
+            cancelAnimationFrame(animationId);
+        }
         var collisions = [];
         blocks.forEach(function (block) {
             if (!collisions.includes("right") &&
@@ -368,6 +373,10 @@ function animate() {
     }
     else if (keys.left.pressed && lastKey === "left") {
         player.velocity.x = -5;
+    }
+    if (pellets.length === 0) {
+        alert("You win");
+        console.log("You are the winner");
     }
 }
 animate();
