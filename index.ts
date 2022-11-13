@@ -78,12 +78,15 @@ class Ghost {
   velocity: Velocity;
   radius: number;
   prevCollisions: Array<string>;
+  speed: number;
+  static speed: number = 2;
 
   constructor(position: Position, velocity: Velocity) {
     this.position = position;
     this.velocity = velocity;
     this.radius = 15;
     this.prevCollisions = [];
+    this.speed = Ghost.speed;
   }
 
   draw() {
@@ -159,7 +162,7 @@ let ghosts: Array<Ghost> = [
       x: Boundary.width * 7 + Boundary.width / 2,
       y: Boundary.height + Boundary.height / 2,
     },
-    { x: 0, y: 0 }
+    { x: Ghost.speed, y: 0 }
   ),
 ];
 const player = new Player(
@@ -347,12 +350,14 @@ function characterCollideWithBlock(
   velocity: Velocity,
   block: Boundary
 ): boolean {
+  const padding = Boundary.width / 2 - character.radius - 1;
   return (
     position.y - character.radius + velocity.y <=
-      block.position.y + block.height &&
-    position.x + character.radius + velocity.x >= block.position.x &&
-    position.y + character.radius + velocity.y >= block.position.y &&
-    position.x - character.radius + velocity.x <= block.position.x + block.width
+      block.position.y + block.height + padding &&
+    position.x + character.radius + velocity.x >= block.position.x - padding &&
+    position.y + character.radius + velocity.y >= block.position.y - padding &&
+    position.x - character.radius + velocity.x <=
+      block.position.x + block.width + padding
   );
 }
 
@@ -449,56 +454,119 @@ function animate() {
   ghosts.forEach((ghost) => {
     ghost.move();
 
-    let collisions: Array<string> = [];
+    if (
+      Math.hypot(
+        ghost.position.x - player.position.x,
+        ghost.position.y - player.position.x
+      ) <
+      ghost.radius + player.radius
+    ) {
+      player.velocity.x = 0;
+      player.velocity.y = 0;
+      console.log("You lose");
+    }
+
+    const collisions: Array<string> = [];
     blocks.forEach((block) => {
       if (
         !collisions.includes("right") &&
         characterCollideWithBlock(
           ghost,
           ghost.position,
-          { ...ghost.velocity, x: 5, y: 0 },
+          { ...ghost.velocity, x: Ghost.speed, y: 0 },
           block
         )
       ) {
         collisions.push("right");
-      } else if (
+      }
+      if (
         !collisions.includes("left") &&
         characterCollideWithBlock(
           ghost,
           ghost.position,
-          { ...ghost.velocity, x: -5, y: 0 },
+          { ...ghost.velocity, x: -Ghost.speed, y: 0 },
           block
         )
       ) {
         collisions.push("left");
-      } else if (
-        !collisions.includes("top") &&
+      }
+      if (
+        !collisions.includes("up") &&
         characterCollideWithBlock(
           ghost,
           ghost.position,
-          { ...ghost.velocity, x: 0, y: -5 },
+          { ...ghost.velocity, x: 0, y: -Ghost.speed },
           block
         )
       ) {
-        collisions.push("top");
-      } else if (
+        collisions.push("up");
+      }
+      if (
         !collisions.includes("down") &&
         characterCollideWithBlock(
           ghost,
           ghost.position,
-          { ...ghost.velocity, x: 0, y: 5 },
+          { ...ghost.velocity, x: 0, y: Ghost.speed },
           block
         )
       ) {
-        collisions.push("bottom");
-      }
-      if (collisions.length > ghost.prevCollisions.length) {
-        ghost.prevCollisions = collisions;
-      }
-      if (JSON.stringify(collisions) !== JSON.stringify(ghost.prevCollisions)) {
-        console.log("googog");
+        collisions.push("down");
       }
     });
+
+    if (collisions.length > ghost.prevCollisions.length) {
+      ghost.prevCollisions = collisions;
+      console.log(ghost.prevCollisions);
+      console.log(JSON.stringify(collisions));
+      console.log(JSON.stringify(ghost.prevCollisions));
+    }
+
+    if (JSON.stringify(collisions) !== JSON.stringify(ghost.prevCollisions)) {
+      console.log("googog");
+      console.log(ghost.prevCollisions);
+      console.log(collisions);
+
+      if (ghost.velocity.x > 0) {
+        ghost.prevCollisions.push("right");
+      } else if (ghost.velocity.x < 0) {
+        ghost.prevCollisions.push("left");
+      } else if (ghost.velocity.y < 0) {
+        ghost.prevCollisions.push("up");
+      } else if (ghost.velocity.y > 0) {
+        ghost.prevCollisions.push("down");
+      }
+
+      const pathways = ghost.prevCollisions.filter((collision) => {
+        return !collisions.includes(collision);
+      });
+
+      console.log(pathways);
+
+      const direction = pathways[Math.floor(Math.random() * pathways.length)];
+
+      console.log(direction);
+
+      switch (direction) {
+        case "down":
+          ghost.velocity.y = Ghost.speed;
+          ghost.velocity.x = 0;
+          break;
+        case "up":
+          ghost.velocity.y = -Ghost.speed;
+          ghost.velocity.x = 0;
+          break;
+        case "right":
+          ghost.velocity.y = 0;
+          ghost.velocity.x = Ghost.speed;
+          break;
+        case "left":
+          ghost.velocity.y = 0;
+          ghost.velocity.x = -Ghost.speed;
+          break;
+      }
+
+      ghost.prevCollisions = [];
+    }
   });
   if (keys.up.pressed && lastKey === "up") {
     player.velocity.y = -5;
